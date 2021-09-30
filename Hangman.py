@@ -15,7 +15,7 @@ class Hangman:
         self._score = 0
         self._player_name = ""
         self.load_scores()
-
+#        self._high_scores = {1:["", 0], 2:["", 0], 3:["", 0], 4:["", 0], 5:["", 0]}
 
     def get_word_list(self):
         """get method for word_list"""
@@ -66,15 +66,18 @@ class Hangman:
     def manage_high_scores(self, player, score):
         """Takes a player name and their score and checks it against the current high score. If the score
         is great enough to make the list (a dictionary of lists), then it will be added."""
-        new_high_scores = self._high_scores
+ #       new_high_scores = self._high_scores
         end_of_dict = len(self._high_scores)
         for key in self._high_scores:
             if score >= self._high_scores[key][1]:
                 for el in range(end_of_dict, key, -1):
-                    new_high_scores[el] = self._high_scores[el-1]
-                new_high_scores[key][0] = player
-                new_high_scores[key][1] = score
-                self._high_scores = new_high_scores
+                    self._high_scores[el] = self._high_scores[el-1]
+ #                   new_high_scores[el] = self._high_scores[el-1]
+                self._high_scores[key] = [player, score]
+ #               self._high_scores[key] = score
+ #               new_high_scores[key][0] = player
+ #               new_high_scores[key][1] = score
+ #               self._high_scores = new_high_scores
                 self.save_scores()
                 break
  
@@ -186,6 +189,6 @@ class Hangman:
 
 if __name__ == "__main__":
     game = Hangman()
-    game.save_scores()
+ #   game.save_scores()
     game.introduction()
     game.play()
