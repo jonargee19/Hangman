@@ -6,7 +6,8 @@ import pickle
 class Hangman:
 
     def __init__(self):
-        self._word_list = "cat dog".split()
+        with open('words_list.txt', 'r') as file:
+            self._word_list = [line.strip() for line in file]
         self._guesses = 0
         self._win_status = "Playing"
         self._spaces = ""
