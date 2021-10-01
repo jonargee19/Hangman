@@ -16,7 +16,6 @@ class Hangman:
         self._score = 0
         self._player_name = ""
         self.load_scores()
-#        self._high_scores = {1:["", 0], 2:["", 0], 3:["", 0], 4:["", 0], 5:["", 0]}
 
     def get_word_list(self):
         """get method for word_list"""
@@ -213,6 +212,5 @@ class Hangman:
 
 if __name__ == "__main__":
     game = Hangman()
- #   game.save_scores()
     game.introduction()
     game.play()
