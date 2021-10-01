@@ -37,7 +37,7 @@ class Hangman:
             return False
 
     def validate_letter(self, letter):
-        """Makes sure input is valid."""
+        """Makes sure input is valid by checking that it's a single alpha character"""
         if len(letter) == 1:
             if letter.isalpha():
                 return True
@@ -45,73 +45,86 @@ class Hangman:
 
     def check_against_word(self, letter):
         """Checks guessed letter against word."""
-        return letter in self._word
+        return letter.lower() in self._word
 
     def update_game(self, letter, guess_bool):
-        """Updates the amount of guesses left and the progress of the word to be guessed."""
+        """Takes a letter and whether the guess was correct and updates the amount of guesses 
+        left and the progress of the word to be guessed."""
         self._letters_guessed += letter
-        if guess_bool:
+        if guess_bool:                          # if guess was correct
             for i in range(len(self._word)):
                 if letter == self._word[i]:
                     spaces_list = list(self._spaces)
-                    spaces_list[i*2] = letter
+                    spaces_list[i*2] = letter               # finding correct space for letter 
                     self._spaces = "".join(spaces_list)  
             if "_" not in self._spaces:
                 self._win_status = "Won"          
-        elif self.decrement_guesses():
+        elif self.decrement_guesses():          # if guess was incorrect
             return
         else:
             self._win_status = "Lost"
 
     def manage_high_scores(self, player, score):
         """Takes a player name and their score and checks it against the current high score. If the score
-        is great enough to make the list (a dictionary of lists), then it will be added."""
- #       new_high_scores = self._high_scores
+        is great enough to make the list (a dictionary of lists), then it will be added. Returns new_score
+        as bool value that tells us whether a score has been added to the list."""
         end_of_dict = len(self._high_scores)
         for key in self._high_scores:
             if score >= self._high_scores[key][1]:
-                for el in range(end_of_dict, key, -1):
+                new_score = True
+                for el in range(end_of_dict, key, -1):                  # bumps scores down to make room for new score
                     self._high_scores[el] = self._high_scores[el-1]
- #                   new_high_scores[el] = self._high_scores[el-1]
                 self._high_scores[key] = [player, score]
- #               self._high_scores[key] = score
- #               new_high_scores[key][0] = player
- #               new_high_scores[key][1] = score
- #               self._high_scores = new_high_scores
                 self.save_scores()
-                break
+                return new_score
+        new_score = False        
+        return new_score
  
     def win_lose(self):
-        """Determines what happens if a player wins or loses."""
+        """Determines what happens if a player wins or loses by calling win/lose sub methods."""
         if self._win_status == "Lost":
-            self.manage_high_scores(self._player_name, self._score)           
-            print(f"Sorry, you don't have any guesses left. You lost! \nYour score was {self._score}")
-            print("HIGH SCORES:")
-            for el in self._high_scores:
-                print(f"{el}: {self._high_scores[el]}")
-            print("Would you like to play again? ('y' for yes and 'n' for no)")
-            choice = input()
-            if choice == "y":
-                print()
-                self.clear_board(False)
-                self.play()
-            else:
-                return
+            self.lose()
         if self._win_status == "Won":
-            self._score += 1
-            os.system('cls')
-            print(self._spaces)
-            print(f"You guessed it! \nYour score is: {self._score} \nWould you like to play again? ('y' for yes and 'n' for no)")
-            choice = input()
-            if choice == "y":
-                print()
-                self.clear_board(True)
-                self.play()
-            else:
-                return
+            self.win()
+
+    def win(self):
+        """Sub method with instructions for a player win. Adds a point to their score and asks if they'd 
+        like to continue."""
+        self._score += 1
+        os.system('cls')
+        print(self._spaces)
+        print(f"You guessed it! \nYour score is: {self._score} \nWould you like to play again? ('y' for yes and 'n' for no)")
+        choice = input()
+        if choice == "y":
+            print()
+            self.clear_board(True)
+            self.play()
+        else:
+            return
+
+    def lose(self):
+        """Sub method with instructions for a player loss. manage_high_scores() checks to see if a 
+        new high score has been reached. Displays high scores then asks player if they wish to continue."""
+        new_score = self.manage_high_scores(self._player_name, self._score)           
+        print(f"\nSorry, you don't have any guesses left. You lost! \nYour score was {self._score}")
+        time.sleep(.5)
+        if new_score is True:
+            print("You made the high scores list!\n")
+            time.sleep(.5)
+        print("HIGH SCORES:")
+        for el in self._high_scores:
+            print(f"{el}: {self._high_scores[el]}")
+        print("Would you like to play again? ('y' for yes and 'n' for no)")
+        choice = input()
+        if choice == "y":
+            print()
+            self.clear_board(False)
+            self.play()
+        else:
+            return
 
     def introduction(self):
-        """Introduces the game."""
+        """Introduces the game and asks for player name."""
         os.system('cls')
         print("Welcome to Hangman!")
         print()
@@ -129,7 +142,7 @@ class Hangman:
         
 
     def clear_board(self, won):
-        """Resets game state, word, spaces, and guesses."""
+        """Resets game state, word, spaces, and guesses. Clears the screen."""
         self._guesses = 0
         self._win_status = "Playing"
         self._word = ""
@@ -150,19 +163,14 @@ class Hangman:
             self._high_scores = pickle.load(file)
 
     def play(self):
-        """method for playing the game"""
-        self._word = self._word_list[random.randint(0, len(self._word_list)-1)]
-        self._guesses = len(self._word)
+        """Method for playing the game. Sets game variables by calling sub method. Main game loop checks for
+        'Playing' status then displays board. User inputs a letter then letter is validated. After validation, 
+        letter is checked against target word. It's either in the word, not in the word, or has already been
+        guessed. In all cases the game is updated and conditions are checked for a win or loss."""
+        self.set_game_variables()
         if self._win_status == "Playing":
-            for letter in self._word:
-                    self._spaces += "_ "
             while self._win_status == "Playing" and self._guesses != 0:
-                os.system('cls')
-                print(self._spaces, "\n")
-                print("Score: ", self._score)
-                print("Letters guessed: ", self._letters_guessed)
-                print("Guesses remaining: ", self._guesses)
-                print("Guess a letter: ")
+                self.display_board()
                 guessed_letter = input()
                 if self.validate_letter(guessed_letter) is False:
                     print("Input invalid, please try again.")
@@ -185,7 +193,22 @@ class Hangman:
                     self.update_game(guessed_letter, False)
                     continue
             self.win_lose()
-            
+
+    def display_board(self):
+        """Sub method for displaying the game screen."""
+        os.system('cls')
+        print(self._spaces, "\n")
+        print("Score: ", self._score)
+        print("Letters guessed: ", self._letters_guessed)
+        print("Guesses remaining: ", self._guesses)
+        print("Guess a letter: ")
+
+    def set_game_variables(self):
+        """Sub method for setting up word, guesses, and spaces."""
+        self._word = self._word_list[random.randint(0, len(self._word_list)-1)]
+        self._guesses = len(self._word)
+        for letter in self._word:
+            self._spaces += "_ "    
 
 if __name__ == "__main__":
     game = Hangman()
