@@ -2,6 +2,12 @@ import random
 import time
 import os
 import pickle
+import platform
+
+if platform.system() == "Darwin":
+    clear = "clear"
+else:
+    clear = "cls"
 
 class Hangman:
 
@@ -91,7 +97,7 @@ class Hangman:
         """Sub method with instructions for a player win. Adds a point to their score and asks if they'd 
         like to continue."""
         self._score += 1
-        os.system('cls')
+        os.system(clear)
         print(self._spaces)
         print(f"You guessed it! \nYour score is: {self._score} \nWould you like to play again? ('y' for yes and 'n' for no)")
         choice = input()
@@ -125,7 +131,7 @@ class Hangman:
 
     def introduction(self):
         """Introduces the game and asks for player name."""
-        os.system('cls')
+        os.system(clear)
         print("Welcome to Hangman!")
         print()
         time.sleep(1)
@@ -138,7 +144,7 @@ class Hangman:
         self._player_name = input()
         print(f"I hope you know some words, {self._player_name}...")
         time.sleep(1)
-        os.system('cls')
+        os.system(clear)
         
 
     def clear_board(self, won):
@@ -150,7 +156,7 @@ class Hangman:
         self._letters_guessed = ""
         if won is False:
             self._score = 0
-        os.system('cls')
+        os.system(clear)
 
     def save_scores(self):
         """Saves high scores via pickling."""
@@ -196,7 +202,7 @@ class Hangman:
 
     def display_board(self):
         """Sub method for displaying the game screen."""
-        os.system('cls')
+        os.system(clear)
         print(self._spaces, "\n")
         print("Score: ", self._score)
         print("Letters guessed: ", self._letters_guessed)
